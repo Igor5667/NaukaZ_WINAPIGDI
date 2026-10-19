@@ -1,6 +1,8 @@
 ﻿# include <windows.h>
 # include <string>
 
+#define ROZMIAR_KOTA 200
+
 using namespace std;
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -59,24 +61,46 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
 
+            HPEN pioro = CreatePen(1, 5, RGB(255, 255, 0));
+            HBRUSH pedzel = CreateSolidBrush(RGB(255, 0, 0));
+
+            SelectObject(hdc, GetStockObject(NULL_PEN));
+            SelectObject(hdc, pedzel);
+
             POINT uszy[5] = {
-                {cat_centre_x - 80, cat_centre_y}, // lewy bok
-                {cat_centre_x - 40, cat_centre_y - 40}, // wierzcholek lewego ucha
+                {cat_centre_x - ROZMIAR_KOTA, cat_centre_y}, // lewy bok
+                {cat_centre_x - ROZMIAR_KOTA/2, cat_centre_y - ROZMIAR_KOTA / 2}, // wierzcholek lewego ucha
                 {cat_centre_x, cat_centre_y}, // srodek
-                {cat_centre_x + 40, cat_centre_y - 40}, // wierzcholek prawego ucha
-                {cat_centre_x + 80, cat_centre_y}, // prawy bok
+                {cat_centre_x + ROZMIAR_KOTA / 2, cat_centre_y - ROZMIAR_KOTA / 2}, // wierzcholek prawego ucha
+                {cat_centre_x + ROZMIAR_KOTA, cat_centre_y}, // prawy bok
             };
+
+            // WYPELNIENIE KOTA
 
             Polygon(hdc, uszy, 5);
             
             Chord(hdc,
-                cat_centre_x - 80, cat_centre_y - 80,   // Lewy-górny róg prostokąta opisującego elipsę
-                cat_centre_x + 80, cat_centre_y + 80,   // Prawy-dolny róg
-                cat_centre_x - 80, cat_centre_y,   // Punkt początkowy łuku (po prawej)
-                cat_centre_x + 80, cat_centre_y    // Punkt końcowy łuku (po lewej)
+                cat_centre_x - ROZMIAR_KOTA, cat_centre_y - ROZMIAR_KOTA,   // Lewy-górny róg prostokąta opisującego elipsę
+                cat_centre_x + ROZMIAR_KOTA, cat_centre_y + ROZMIAR_KOTA * 3 / 4,   // Prawy-dolny róg
+                cat_centre_x - ROZMIAR_KOTA, cat_centre_y,   // Punkt początkowy łuku (po prawej)
+                cat_centre_x + ROZMIAR_KOTA, cat_centre_y    // Punkt końcowy łuku (po lewej)
             );
 
+            SelectObject(hdc, pioro);
 
+            // OBRYS KOTA
+
+            Polyline(hdc, uszy, 5);
+
+            Arc(hdc,
+                cat_centre_x - ROZMIAR_KOTA, cat_centre_y - ROZMIAR_KOTA,   // Lewy-górny róg prostokąta opisującego elipsę
+                cat_centre_x + ROZMIAR_KOTA, cat_centre_y + ROZMIAR_KOTA * 3 / 4,   // Prawy-dolny róg
+                cat_centre_x - ROZMIAR_KOTA, cat_centre_y,   // Punkt początkowy łuku (po prawej)
+                cat_centre_x + ROZMIAR_KOTA, cat_centre_y    // Punkt końcowy łuku (po lewej)
+            );
+
+            DeleteObject(pioro);
+            DeleteObject(pedzel);
 
             EndPaint(hwnd, &ps);
             return 0;
