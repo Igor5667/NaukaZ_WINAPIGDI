@@ -53,8 +53,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 }
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    static int mouse_x = -1, mouse_y = -1;
-    int cat_centre_x = 250, cat_centre_y= 250;
+    static int mysz_x = -1, mysz_y = -1;
+    int srodek_kota_x = 250, srodek_kota_y = 250;
+    int srodek_oka_lewego_x = srodek_kota_x - ROZMIAR_KOTA /2, srodek_oka_lewego_y = srodek_kota_y;
+    int srodek_oka_prawego_x = srodek_kota_x + ROZMIAR_KOTA /2, srodek_oka_prawego_y = srodek_kota_y;
+    int rozmiar_oka = 25;
 
     switch (uMsg) {
         case WM_PAINT: {
@@ -62,56 +65,79 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             HDC hdc = BeginPaint(hwnd, &ps);
 
             HPEN pioro = CreatePen(1, 5, RGB(255, 255, 0));
-            HBRUSH pedzel = CreateSolidBrush(RGB(255, 0, 0));
+            HBRUSH pedzelCzerwony = CreateSolidBrush(RGB(255, 0, 0));
+            HBRUSH pedzelZolty = CreateSolidBrush(RGB(255, 255, 0));
 
-            SelectObject(hdc, GetStockObject(NULL_PEN));
-            SelectObject(hdc, pedzel);
 
             POINT uszy[5] = {
-                {cat_centre_x - ROZMIAR_KOTA, cat_centre_y}, // lewy bok
-                {cat_centre_x - ROZMIAR_KOTA/2, cat_centre_y - ROZMIAR_KOTA / 2}, // wierzcholek lewego ucha
-                {cat_centre_x, cat_centre_y}, // srodek
-                {cat_centre_x + ROZMIAR_KOTA / 2, cat_centre_y - ROZMIAR_KOTA / 2}, // wierzcholek prawego ucha
-                {cat_centre_x + ROZMIAR_KOTA, cat_centre_y}, // prawy bok
+                {srodek_kota_x - ROZMIAR_KOTA, srodek_kota_y}, // lewy bok
+                {srodek_kota_x - ROZMIAR_KOTA/2, srodek_kota_y - ROZMIAR_KOTA / 2}, // wierzcholek lewego ucha
+                {srodek_kota_x, srodek_kota_y}, // srodek
+                {srodek_kota_x + ROZMIAR_KOTA / 2, srodek_kota_y - ROZMIAR_KOTA / 2}, // wierzcholek prawego ucha
+                {srodek_kota_x + ROZMIAR_KOTA, srodek_kota_y}, // prawy bok
             };
 
             // WYPELNIENIE KOTA
 
+            SelectObject(hdc, GetStockObject(NULL_PEN));
+            SelectObject(hdc, pedzelCzerwony);
+
             Polygon(hdc, uszy, 5);
             
             Chord(hdc,
-                cat_centre_x - ROZMIAR_KOTA, cat_centre_y - ROZMIAR_KOTA,   // Lewy-górny róg prostokąta opisującego elipsę
-                cat_centre_x + ROZMIAR_KOTA, cat_centre_y + ROZMIAR_KOTA * 3 / 4,   // Prawy-dolny róg
-                cat_centre_x - ROZMIAR_KOTA, cat_centre_y,   // Punkt początkowy łuku (po prawej)
-                cat_centre_x + ROZMIAR_KOTA, cat_centre_y    // Punkt końcowy łuku (po lewej)
+                srodek_kota_x - ROZMIAR_KOTA, srodek_kota_y - ROZMIAR_KOTA,   // Lewy-górny róg prostokąta opisującego elipsę
+                srodek_kota_x + ROZMIAR_KOTA, srodek_kota_y + ROZMIAR_KOTA * 3 / 4,   // Prawy-dolny róg
+                srodek_kota_x - ROZMIAR_KOTA, srodek_kota_y,   // Punkt początkowy łuku (po prawej)
+                srodek_kota_x + ROZMIAR_KOTA, srodek_kota_y    // Punkt końcowy łuku (po lewej)
             );
 
-            SelectObject(hdc, pioro);
+
+            // OCZY KOTA
+
+            SelectObject(hdc, pedzelZolty);
+
+            // lewe oko
+            Ellipse(hdc, 
+                srodek_oka_lewego_x - rozmiar_oka,
+                srodek_oka_lewego_y - rozmiar_oka,
+                srodek_oka_lewego_x + rozmiar_oka,
+                srodek_oka_lewego_y + rozmiar_oka
+            );
+
+            // prawe oko
+            Ellipse(hdc,
+                srodek_oka_prawego_x - rozmiar_oka,
+                srodek_oka_prawego_y - rozmiar_oka,
+                srodek_oka_prawego_x + rozmiar_oka,
+                srodek_oka_prawego_y + rozmiar_oka
+            );
 
             // OBRYS KOTA
+            
+            SelectObject(hdc, pioro);
 
             Polyline(hdc, uszy, 5);
 
             Arc(hdc,
-                cat_centre_x - ROZMIAR_KOTA, cat_centre_y - ROZMIAR_KOTA,   // Lewy-górny róg prostokąta opisującego elipsę
-                cat_centre_x + ROZMIAR_KOTA, cat_centre_y + ROZMIAR_KOTA * 3 / 4,   // Prawy-dolny róg
-                cat_centre_x - ROZMIAR_KOTA, cat_centre_y,   // Punkt początkowy łuku (po prawej)
-                cat_centre_x + ROZMIAR_KOTA, cat_centre_y    // Punkt końcowy łuku (po lewej)
+                srodek_kota_x - ROZMIAR_KOTA, srodek_kota_y - ROZMIAR_KOTA,   // Lewy-górny róg prostokąta opisującego elipsę
+                srodek_kota_x + ROZMIAR_KOTA, srodek_kota_y + ROZMIAR_KOTA * 3 / 4,   // Prawy-dolny róg
+                srodek_kota_x - ROZMIAR_KOTA, srodek_kota_y,   // Punkt początkowy łuku (po prawej)
+                srodek_kota_x + ROZMIAR_KOTA, srodek_kota_y    // Punkt końcowy łuku (po lewej)
             );
 
             DeleteObject(pioro);
-            DeleteObject(pedzel);
+            DeleteObject(pedzelCzerwony);
 
             EndPaint(hwnd, &ps);
             return 0;
         }
         case WM_LBUTTONDOWN: {
             // lParam odnośnie pozycji kursora
-            mouse_x = LOWORD(lParam);
-            mouse_y = HIWORD(lParam);
+            mysz_x = LOWORD(lParam);
+            mysz_y = HIWORD(lParam);
 
             /*char bufor[100];
-            wsprintf(bufor, "x: %d, y: %d", mouse_x, mouse_y);
+            wsprintf(bufor, "x: %d, y: %d", mysz_x, mysz_y);
             MessageBox(hwnd, bufor, "Pozycja myszy", MB_OK);*/
 
             InvalidateRect(hwnd, NULL, TRUE);
