@@ -53,21 +53,36 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 }
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    static int mysz_x = -1, mysz_y = -1;
-    int srodek_kota_x = 250, srodek_kota_y = 250;
-    int srodek_oka_lewego_x = srodek_kota_x - ROZMIAR_KOTA /2, srodek_oka_lewego_y = srodek_kota_y;
-    int srodek_oka_prawego_x = srodek_kota_x + ROZMIAR_KOTA /2, srodek_oka_prawego_y = srodek_kota_y;
-    int rozmiar_oka = 25;
+    static int mysz_x = 255, mysz_y = 255;
+    static int rozmiar_oka = 25;
+
+    switch (wParam) {
+        case VK_UP: {
+            rozmiar_oka += 5;
+            InvalidateRect(hwnd, NULL, TRUE);
+            break;
+        }
+        case VK_DOWN: {
+            rozmiar_oka -= 5;
+            InvalidateRect(hwnd, NULL, TRUE);
+            break;
+        }
+    }
 
     switch (uMsg) {
         case WM_PAINT: {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
 
+            // inicjalizacja zmiennych pozycji kota
+            int srodek_kota_x = mysz_x, srodek_kota_y = mysz_y;
+            int srodek_oka_lewego_x = srodek_kota_x - ROZMIAR_KOTA / 2, srodek_oka_lewego_y = srodek_kota_y + ROZMIAR_KOTA / 8;
+            int srodek_oka_prawego_x = srodek_kota_x + ROZMIAR_KOTA / 2, srodek_oka_prawego_y = srodek_kota_y + ROZMIAR_KOTA / 8;
+
+            // inicjalizacja pedzli
             HPEN pioro = CreatePen(1, 5, RGB(255, 255, 0));
             HBRUSH pedzelCzerwony = CreateSolidBrush(RGB(255, 0, 0));
             HBRUSH pedzelZolty = CreateSolidBrush(RGB(255, 255, 0));
-
 
             POINT uszy[5] = {
                 {srodek_kota_x - ROZMIAR_KOTA, srodek_kota_y}, // lewy bok
@@ -92,7 +107,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             );
 
 
-            // OCZY KOTA
+            // PYSK KOTA
 
             SelectObject(hdc, pedzelZolty);
 
@@ -112,6 +127,15 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                 srodek_oka_prawego_y + rozmiar_oka
             );
 
+            // morda kota
+            POINT morda[3] = {
+                {srodek_kota_x - ROZMIAR_KOTA/6, srodek_kota_y + ROZMIAR_KOTA / 3}, // lewy gorny
+                {srodek_kota_x, srodek_kota_y + (ROZMIAR_KOTA / 3) * 1.5}, // srodek dol
+                {srodek_kota_x + ROZMIAR_KOTA / 6, srodek_kota_y + ROZMIAR_KOTA / 3} // prawy gorny 
+            };
+
+            Polygon(hdc, morda, 3);
+
             // OBRYS KOTA
             
             SelectObject(hdc, pioro);
@@ -127,33 +151,17 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
             DeleteObject(pioro);
             DeleteObject(pedzelCzerwony);
+            DeleteObject(pedzelZolty);
 
             EndPaint(hwnd, &ps);
             return 0;
         }
-        case WM_LBUTTONDOWN: {
-            // lParam odnośnie pozycji kursora
+        case WM_MOUSEMOVE: {
             mysz_x = LOWORD(lParam);
             mysz_y = HIWORD(lParam);
 
-            /*char bufor[100];
-            wsprintf(bufor, "x: %d, y: %d", mysz_x, mysz_y);
-            MessageBox(hwnd, bufor, "Pozycja myszy", MB_OK);*/
-
             InvalidateRect(hwnd, NULL, TRUE);
             return 0;
-        }
-        case WM_RBUTTONUP: {
-            string msg = "Kliknales przycisk ";
-            if (wParam & MK_CONTROL) msg += "z controlem";
-            else msg += "bez controla";
-            msg += ". Czy to prawda?";
-
-            int decyzja = MessageBox(hwnd, msg.c_str(), "Prawy klawisz nacisniety", MB_YESNO);
-
-            if (decyzja != IDYES) MessageBox(hwnd, "Klamiesz", "Klamca", MB_OK);
-
-            return DefWindowProc(hwnd, uMsg, wParam, lParam);
         }
         case WM_DESTROY:
             PostQuitMessage(0);
