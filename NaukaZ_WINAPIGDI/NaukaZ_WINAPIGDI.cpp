@@ -52,11 +52,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     static int mouse_x = -1, mouse_y = -1;
+    int cat_centre_x = 250, cat_centre_y= 250;
 
     switch (uMsg) {
         case WM_PAINT: {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
+
+            POINT uszy[5] = {
+                {cat_centre_x - 80, cat_centre_y}, // lewy bok
+                {cat_centre_x - 40, cat_centre_y - 40}, // wierzcholek lewego ucha
+                {cat_centre_x, cat_centre_y}, // srodek
+                {cat_centre_x + 40, cat_centre_y - 40}, // wierzcholek prawego ucha
+                {cat_centre_x + 80, cat_centre_y}, // prawy bok
+            };
+
+            Polygon(hdc, uszy, 5);
+            
+            Chord(hdc,
+                cat_centre_x - 80, cat_centre_y - 80,   // Lewy-górny róg prostokąta opisującego elipsę
+                cat_centre_x + 80, cat_centre_y + 80,   // Prawy-dolny róg
+                cat_centre_x - 80, cat_centre_y,   // Punkt początkowy łuku (po prawej)
+                cat_centre_x + 80, cat_centre_y    // Punkt końcowy łuku (po lewej)
+            );
 
 
 
